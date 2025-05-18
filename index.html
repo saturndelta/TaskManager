@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends Task Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Friends Task Manager</h1>
+            <div id="userInfo" class="user-info" style="display:none;">
+                Logged in as: <span id="loggedInUser"></span>
+                <button id="logoutButton">Logout</button>
+            </div>
+        </header>
+
+        <div id="loginSection">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <p id="loginError" class="error-message"></p>
+        </div>
+
+        <div id="taskSection" style="display:none;">
+            <h2>Create New Task</h2>
+            <form id="taskForm">
+                <input type="url" id="videoLink" placeholder="Video Link (optional)">
+                <textarea id="taskDescription" placeholder="Task Description" required></textarea>
+                <select id="assignTo">
+                    <option value="">Assign to (optional)</option>
+                    <!-- User options will be populated here -->
+                </select>
+                <button type="submit">Add Task</button>
+            </form>
+            <p id="taskFormError" class="error-message"></p>
+
+            <h2>Task List</h2>
+            <div class="filters">
+                <label for="statusFilter">Filter by status:</label>
+                <select id="statusFilter">
+                    <option value="all">All</option>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Solved">Solved</option>
+                </select>
+                <label for="userFilter">Filter by user:</label>
+                <select id="userFilter">
+                    <option value="all">All Users</option>
+                     <!-- User options will be populated here -->
+                </select>
+            </div>
+            <div id="taskList">
+                <!-- Tasks will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Editing Task and Adding Solution -->
+    <div id="editTaskModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">×</span>
+            <h2>Edit Task / Add Solution</h2>
+            <form id="editTaskForm">
+                <input type="hidden" id="editTaskId">
+                <div>
+                    <label for="editVideoLink">Video Link:</label>
+                    <input type="url" id="editVideoLink">
+                </div>
+                <div>
+                    <label for="editTaskDescription">Task Description:</label>
+                    <textarea id="editTaskDescription" required></textarea>
+                </div>
+                <div>
+                    <label for="editSolution">Solution:</label>
+                    <textarea id="editSolution"></textarea>
+                </div>
+                <div>
+                    <label for="editAssignTo">Assigned To:</label>
+                    <select id="editAssignTo">
+                        <option value="">Unassigned</option>
+                         <!-- User options will be populated here -->
+                    </select>
+                </div>
+                <div>
+                    <label for="editStatus">Status:</label>
+                    <select id="editStatus">
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Solved">Solved</option>
+                    </select>
+                </div>
+                <button type="submit">Save Changes</button>
+            </form>
+            <p id="editTaskError" class="error-message"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

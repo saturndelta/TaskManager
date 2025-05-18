@@ -24,6 +24,19 @@
                 <button type="submit">Login</button>
             </form>
             <p id="loginError" class="error-message"></p>
+            <p>Don't have an account? <a href="#" id="registerLink">Register here</a></p>
+        </div>
+
+        <div id="registerSection" style="display:none;">
+            <h2>Register</h2>
+            <form id="registerForm">
+                <input type="text" id="registerUsername" placeholder="Username" required>
+                <input type="password" id="registerPassword" placeholder="Password" required>
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                <button type="submit">Register</button>
+            </form>
+            <p id="registerError" class="error-message"></p>
+            <p>Already have an account? <a href="#" id="loginLink">Login here</a></p>
         </div>
 
         <div id="taskSection" style="display:none;">

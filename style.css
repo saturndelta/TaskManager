@@ -61,7 +61,7 @@ button:hover {
     background-color: #4cae4c;
 }
 
-#loginForm button, #taskForm button, #editTaskForm button {
+#loginForm button, #taskForm button, #editTaskForm button, #registerForm button {
     width: 100%;
 }
 
@@ -121,6 +121,8 @@ button:hover {
 .task-actions .edit-btn:hover { background-color: #ec971f; }
 .task-actions .solve-btn { background-color: #5bc0de; }
 .task-actions .solve-btn:hover { background-color: #46b8da; }
+.task-actions .reopen-btn { background-color: #d9534f; }
+.task-actions .reopen-btn:hover { background-color: #c9302c; }
 
 
 /* Modal Styles */
@@ -184,4 +186,33 @@ button:hover {
     margin-right: 15px;
     padding: 8px;
     width: auto;
+}
+
+/* Login/Register Section */
+#loginSection, #registerSection {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+#loginSection h2, #registerSection h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#loginSection p, #registerSection p {
+    text-align: center;
+    margin-top: 15px;
+}
+
+#loginSection a, #registerSection a {
+    color: #5cb85c;
+    text-decoration: none;
+}
+
+#loginSection a:hover, #registerSection a:hover {
+    text-decoration: underline;
 }

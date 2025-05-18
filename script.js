@@ -1,22 +1,23 @@
-// IMPORTANT: Replace with your Google Apps Script Web App URL
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsGIFJ98x-q3iCD5SskE8nhUCDHFySDpDWZHNaayxllcoOwuHbffYaO2TNLjUMMz7vhQ/exec"; 
+// --- Constants ---
+const API_URL = 'https://script.google.com/macros/s/AKfycbxsGIFJ98x-q3iCD5SskE8nhUCDHFySDpDWZHNaayxllcoOwuHbffYaO2TNLjUMMz7vhQ/exec';
 
-const loginSection = document.getElementById('loginSection');
-const taskSection = document.getElementById('taskSection');
+// --- DOM Elements ---
 const loginForm = document.getElementById('loginForm');
-const taskForm = document.getElementById('taskForm');
-const taskListDiv = document.getElementById('taskList');
-const userInfoDiv = document.getElementById('userInfo');
+const loginError = document.getElementById('loginError');
+const userInfo = document.getElementById('userInfo');
 const loggedInUserSpan = document.getElementById('loggedInUser');
 const logoutButton = document.getElementById('logoutButton');
-const loginErrorP = document.getElementById('loginError');
+const loginSection = document.getElementById('loginSection');
+const taskSection = document.getElementById('taskSection');
+const taskForm = document.getElementById('taskForm');
 const taskFormErrorP = document.getElementById('taskFormError');
+const taskListDiv = document.getElementById('taskList');
 const assignToSelect = document.getElementById('assignTo');
-
-// Edit Modal elements
+const statusFilter = document.getElementById('statusFilter');
+const userFilter = document.getElementById('userFilter');
 const editModal = document.getElementById('editTaskModal');
+const closeButton = document.querySelector('.close-button');
 const editTaskForm = document.getElementById('editTaskForm');
-const closeButton = document.querySelector('.modal .close-button');
 const editTaskIdInput = document.getElementById('editTaskId');
 const editVideoLinkInput = document.getElementById('editVideoLink');
 const editTaskDescriptionTextarea = document.getElementById('editTaskDescription');
@@ -25,39 +26,35 @@ const editAssignToSelect = document.getElementById('editAssignTo');
 const editStatusSelect = document.getElementById('editStatus');
 const editTaskErrorP = document.getElementById('editTaskError');
 
-// Filter elements
-const statusFilter = document.getElementById('statusFilter');
-const userFilter = document.getElementById('userFilter');
-
-let allTasks = []; // To store all tasks for client-side filtering
-let availableUsers = []; // To store user list
+// --- Global Variables ---
+let allTasks = [];
+let availableUsers = [];
 
 // --- API Communication ---
 async function apiCall(action, data = {}) {
     try {
-        // Simplified fetch request without extra CORS settings
-        const response = await fetch(SCRIPT_URL, {
+        const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ action, ...data })
+            body: JSON.stringify({
+                action: action,
+                ...data
+            })
         });
-        
+
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error("API Error Response Text:", errorText);
-            throw new Error(`Network response was not ok: ${response.statusText}`);
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        
+
         const result = await response.json();
-        console.log("API Response for " + action + ":", result);
         if (!result.success) {
             throw new Error(result.message || 'API call failed');
         }
         return result;
     } catch (error) {
-        console.error('API Call Error:', error);
+        console.error('API call error:', error);
         throw error;
     }
 }
@@ -65,75 +62,73 @@ async function apiCall(action, data = {}) {
 // --- Authentication ---
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    loginErrorP.textContent = '';
+    loginError.textContent = '';
+    
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-
+    
     try {
         const result = await apiCall('login', { username, password });
-        localStorage.setItem('loggedInUser', result.username);
-        showTaskSection(result.username);
-        fetchAndRenderTasks();
-        fetchAndPopulateUsers();
+        localStorage.setItem('loggedInUser', username);
+        checkLoginStatus();
     } catch (error) {
-        loginErrorP.textContent = error.message || 'Login failed. Please try again.';
+        loginError.textContent = error.message || 'Login failed. Please try again.';
     }
 });
 
 logoutButton.addEventListener('click', () => {
     localStorage.removeItem('loggedInUser');
-    showLoginSection();
+    checkLoginStatus();
 });
 
 function checkLoginStatus() {
-    const user = localStorage.getItem('loggedInUser');
-    if (user) {
-        showTaskSection(user);
+    const currentUser = localStorage.getItem('loggedInUser');
+    
+    if (currentUser) {
+        loggedInUserSpan.textContent = currentUser;
+        userInfo.style.display = 'block';
+        loginSection.style.display = 'none';
+        taskSection.style.display = 'block';
+        
+        // Load tasks and users
+        fetchUsers();
         fetchAndRenderTasks();
-        fetchAndPopulateUsers();
     } else {
-        showLoginSection();
+        userInfo.style.display = 'none';
+        loginSection.style.display = 'block';
+        taskSection.style.display = 'none';
     }
 }
 
-function showLoginSection() {
-    loginSection.style.display = 'block';
-    taskSection.style.display = 'none';
-    userInfoDiv.style.display = 'none';
-    allTasks = []; // Clear tasks on logout
-    availableUsers = []; // Clear users on logout
-}
-
-function showTaskSection(username) {
-    loginSection.style.display = 'none';
-    taskSection.style.display = 'block';
-    userInfoDiv.style.display = 'block';
-    loggedInUserSpan.textContent = username;
-}
-
-// --- User Population ---
-async function fetchAndPopulateUsers() {
+async function fetchUsers() {
     try {
         const result = await apiCall('getUsers');
         availableUsers = result.users || [];
+        
+        // Populate user dropdowns
         populateUserDropdown(assignToSelect, availableUsers);
-        populateUserDropdown(editAssignToSelect, availableUsers, true); // For edit modal
-        populateUserDropdown(userFilter, availableUsers, true, "All Users"); // For filter
+        populateUserDropdown(userFilter, availableUsers, true);
     } catch (error) {
-        console.error("Failed to fetch users:", error);
-        // Handle error (e.g., display a message)
+        console.error('Failed to fetch users:', error);
     }
 }
 
-function populateUserDropdown(selectElement, users, includeUnassigned = false, defaultOptionText = "Assign to (optional)") {
-    selectElement.innerHTML = ''; // Clear existing options
-
-    const defaultOption = document.createElement('option');
-    defaultOption.value = "";
-    defaultOption.textContent = includeUnassigned ? "Unassigned" : defaultOptionText;
-    selectElement.appendChild(defaultOption);
+function populateUserDropdown(selectElement, users, includeAll = false) {
+    // Clear existing options except the first one
+    while (selectElement.options.length > 1) {
+        selectElement.remove(1);
+    }
     
-    if (defaultOptionText === "All Users") { // Special case for filter
+    // Add "Unassigned" option for user filter
+    if (selectElement.id === "userFilter") {
+        const unassignedOption = document.createElement('option');
+        unassignedOption.value = "";
+        unassignedOption.textContent = "Unassigned";
+        selectElement.appendChild(unassignedOption);
+    }
+    
+    // Special case for "All Users") 
+    if (selectElement.id === "userFilter") { // Special case for filter
         defaultOption.value = "all";
     }
 
@@ -256,11 +251,11 @@ function escapeHTML(str) {
     if (str === null || str === undefined) return '';
     return str.toString().replace(/[&<>"']/g, function (match) {
         return {
-            '&': '&',
-            '<': '<',
-            '>': '>',
-            '"': '"',
-            "'": "'",
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
         }[match];
     });
 }
@@ -373,6 +368,43 @@ function applyFilters(tasksToFilter) {
         return statusMatch && userMatch;
     });
 }
+
+// --- Registration Logic ---
+document.getElementById('registerLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('registerSection').style.display = 'block';
+});
+
+document.getElementById('loginLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('registerSection').style.display = 'none';
+    document.getElementById('loginSection').style.display = 'block';
+});
+
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const registerError = document.getElementById('registerError');
+    registerError.textContent = '';
+    
+    const username = document.getElementById('registerUsername').value;
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (password !== confirmPassword) {
+        registerError.textContent = 'Passwords do not match.';
+        return;
+    }
+    
+    try {
+        const result = await apiCall('register', { username, password });
+        alert('Registration successful! You can now log in.');
+        document.getElementById('registerSection').style.display = 'none';
+        document.getElementById('loginSection').style.display = 'block';
+    } catch (error) {
+        registerError.textContent = error.message || 'Registration failed. Please try again.';
+    }
+});
 
 // --- Initial Load ---
 checkLoginStatus();

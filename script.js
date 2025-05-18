@@ -1,6 +1,5 @@
 // IMPORTANT: Replace with your Google Apps Script Web App URL
-const SCRIPT_URL = "https://script.google.com/macros/library/d/1nwXqklrSXpBVekaRTG3CTT6JrMIshjIwA-eq-7-wzsszs0EdRKSrtgJU/1"; 
-
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsGIFJ98x-q3iCD5SskE8nhUCDHFySDpDWZHNaayxllcoOwuHbffYaO2TNLjUMMz7vhQ/exec"; 
 
 const loginSection = document.getElementById('loginSection');
 const taskSection = document.getElementById('taskSection');
@@ -36,22 +35,19 @@ let availableUsers = []; // To store user list
 // --- API Communication ---
 async function apiCall(action, data = {}) {
     try {
+        // Simplified fetch request without extra CORS settings
         const response = await fetch(SCRIPT_URL, {
             method: 'POST',
-            mode: 'cors', // Important for cross-origin requests
-            cache: 'no-cache',
             headers: {
-                'Content-Type': 'application/json', // This is often ignored by GAS for POST, but good practice
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ action, ...data }),
-            redirect: 'follow' // GAS sometimes redirects, so follow it
+            body: JSON.stringify({ action, ...data })
         });
         
         if (!response.ok) {
-            // Try to get more details if possible
             const errorText = await response.text();
             console.error("API Error Response Text:", errorText);
-            throw new Error(`Network response was not ok: ${response.statusText} - ${errorText}`);
+            throw new Error(`Network response was not ok: ${response.statusText}`);
         }
         
         const result = await response.json();
@@ -62,11 +58,9 @@ async function apiCall(action, data = {}) {
         return result;
     } catch (error) {
         console.error('API Call Error:', error);
-        // Display error to user appropriately in the calling function
-        throw error; // Re-throw to be caught by calling function
+        throw error;
     }
 }
-
 
 // --- Authentication ---
 loginForm.addEventListener('submit', async (e) => {
@@ -143,7 +137,6 @@ function populateUserDropdown(selectElement, users, includeUnassigned = false, d
         defaultOption.value = "all";
     }
 
-
     users.forEach(user => {
         const option = document.createElement('option');
         option.value = user;
@@ -151,7 +144,6 @@ function populateUserDropdown(selectElement, users, includeUnassigned = false, d
         selectElement.appendChild(option);
     });
 }
-
 
 // --- Task Management ---
 taskForm.addEventListener('submit', async (e) => {
@@ -268,7 +260,7 @@ function escapeHTML(str) {
             '<': '<',
             '>': '>',
             '"': '"',
-            "'": '\'',
+            "'": "'",
         }[match];
     });
 }
@@ -281,7 +273,6 @@ function linkify(text) {
     });
 }
 
-
 async function updateTaskStatus(taskId, newStatus, assignedUser = null) {
     const currentUser = localStorage.getItem('loggedInUser');
     const updates = { Status: newStatus };
@@ -290,7 +281,6 @@ async function updateTaskStatus(taskId, newStatus, assignedUser = null) {
     } else if (newStatus === 'Open' && assignedUser === '') { // For re-opening and unassigning
         updates.WhoIsWorkingOn = '';
     }
-
 
     try {
         const result = await apiCall('updateTask', { taskId, updates, username: currentUser });

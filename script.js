@@ -1,5 +1,6 @@
 // IMPORTANT: Replace with your Google Apps Script Web App URL
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsGIFJ98x-q3iCD5SskE8nhUCDHFySDpDWZHNaayxllcoOwuHbffYaO2TNLjUMMz7vhQ/exec"; 
+const SCRIPT_URL = "https://script.google.com/macros/library/d/1nwXqklrSXpBVekaRTG3CTT6JrMIshjIwA-eq-7-wzsszs0EdRKSrtgJU/1"; 
+
 
 const loginSection = document.getElementById('loginSection');
 const taskSection = document.getElementById('taskSection');

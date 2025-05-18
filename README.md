@@ -13,7 +13,7 @@ A web-based task management application where friends can collaborate on tasks. 
 
 ## Technology Stack
 
-- Frontend: HTML, CSS, JavaScript (vanilla)
+- Frontend: HTML, CSS, JavaScript
 - Backend: Google Apps Script
 - Database: Google Sheets
 
@@ -27,8 +27,12 @@ A web-based task management application where friends can collaborate on tasks. 
 ### 2. Set up Google Apps Script
 
 1. In your Google Sheet, click on "Extensions" > "Apps Script"
-2. Delete any code in the editor and paste the contents of `Code.gs` from this repository
-3. Save the project with a name like "Task Management API"
+2. Create the following files in the Apps Script editor:
+   - `Code.gs`: Copy the content from the Code.gs file in this repository
+   - `index.html`: Create a new HTML file and copy the content from index.html
+   - `style.html`: Create a new HTML file and copy the content from style.html
+   - `script.html`: Create a new HTML file and copy the content from script.html
+3. Save the project with a name like "Task Management App"
 4. Deploy the project as a web app:
    - Click "Deploy" > "New deployment"
    - Select type: "Web app"
@@ -37,18 +41,11 @@ A web-based task management application where friends can collaborate on tasks. 
    - Click "Deploy"
    - Copy the web app URL provided after deployment
 
-### 3. Configure the Frontend
+### 3. Access Your Application
 
-1. Open `script.js` in a text editor
-2. Replace `YOUR_GOOGLE_SCRIPT_ID_HERE` in the `API_URL` constant with your deployed web app URL
-
-### 4. Deploy to GitHub Pages
-
-1. Create a new GitHub repository
-2. Upload all files from this project to your repository
-3. Go to repository Settings > Pages
-4. Select the main branch as the source and click Save
-5. Your site will be published at `https://yourusername.github.io/repository-name/`
+1. Open the web app URL in your browser
+2. Register a new account
+3. Start creating and managing tasks
 
 ## Usage
 
@@ -67,10 +64,15 @@ This application uses a simple authentication system and stores passwords in pla
 
 You can customize the application by:
 
-- Modifying the CSS in `style.css` to change the appearance
+- Modifying the CSS in `style.html` to change the appearance
 - Adding additional fields to tasks by updating the HTML, JavaScript, and Google Apps Script code
 - Implementing more advanced features like task comments, file attachments, etc.
 
-## License
+## Troubleshooting
 
-This project is available for personal use.
+If you encounter issues:
+
+1. Make sure your Google Apps Script deployment is set to "Anyone" for access
+2. Check that all HTML files are correctly included in the Apps Script project
+3. Verify that the spreadsheet has the correct permissions
+4. Check the browser console for any JavaScript errors

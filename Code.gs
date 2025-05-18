@@ -1,115 +1,23 @@
-// --- API Endpoints ---
-
-// Handle CORS preflight OPTIONS requests (no custom headers possible)
-function doOptions(e) {
-  // Google Apps Script does not support setting CORS headers for APIs.
-  // This will just return a 200 OK with a simple JSON body.
-  return ContentService.createTextOutput(
-      JSON.stringify({ status: "ok" })
-    )
-    .setMimeType(ContentService.MimeType.JSON);
+// --- Main function to serve the web app ---
+function doGet() {
+  return HtmlService.createTemplateFromFile('index')
+    .evaluate()
+    .setTitle('Friends Task Manager')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
-// Handle GET requests
-function doGet(e) {
-  let responseData;
-  try {
-    const action = e.parameter.action;
-    
-    // Parse JSON parameters
-    const params = {};
-    for (const key in e.parameter) {
-      if (key !== 'action' && key !== 'callback') {
-        try {
-          params[key] = JSON.parse(e.parameter[key]);
-        } catch (error) {
-          params[key] = e.parameter[key];
-        }
-      }
-    }
-    
-    switch (action) {
-      case 'login':
-        responseData = loginUser(params.username, params.password);
-        break;
-      case 'register':
-        responseData = registerUser(params.username, params.password);
-        break;
-      case 'getTasks':
-        responseData = getTasks(params.username);
-        break;
-      case 'addTask':
-        responseData = addTask(params.task, params.username);
-        break;
-      case 'updateTask':
-        responseData = updateTask(params.taskId, params.updates, params.username);
-        break;
-      case 'getUsers':
-        responseData = getUsersList();
-        break;
-      default:
-        responseData = { success: false, message: 'Invalid action' };
-    }
-  } catch (error) {
-    responseData = { success: false, message: 'Error: ' + error.toString() };
-  }
-  
-  // Handle JSONP callback
-  const callback = e.parameter.callback;
-  if (callback) {
-    return ContentService.createTextOutput(callback + '(' + JSON.stringify(responseData) + ')')
-      .setMimeType(ContentService.MimeType.JAVASCRIPT);
-  } else {
-    return ContentService.createTextOutput(JSON.stringify(responseData))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-// Handle POST requests
-function doPost(e) {
-  let responseData;
-  try {
-    const requestData = JSON.parse(e.postData.contents);
-    const action = requestData.action;
-
-    switch (action) {
-      case 'login':
-        responseData = loginUser(requestData.username, requestData.password);
-        break;
-      case 'register':
-        responseData = registerUser(requestData.username, requestData.password);
-        break;
-      case 'getTasks':
-        responseData = getTasks(requestData.username);
-        break;
-      case 'addTask':
-        responseData = addTask(requestData.task, requestData.username);
-        break;
-      case 'updateTask':
-        responseData = updateTask(requestData.taskId, requestData.updates, requestData.username);
-        break;
-      case 'getUsers':
-        responseData = getUsersList();
-        break;
-      default:
-        responseData = { success: false, message: 'Invalid action' };
-    }
-  } catch (error) {
-    responseData = { success: false, message: 'Error: ' + error.toString(), stack: error.stack };
-  }
-
-  return ContentService.createTextOutput(JSON.stringify(responseData))
-    .setMimeType(ContentService.MimeType.JSON);
+// --- Include HTML, CSS, JS files ---
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
 // --- Configuration ---
-const SPREADSHEET_ID = SpreadsheetApp.getActiveSpreadsheet().getId();
 const TASKS_SHEET_NAME = "Tasks";
 const USERS_SHEET_NAME = "Users";
 
 // --- Helper Functions ---
 function getSheet(sheetName) {
-  return SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(sheetName);
+  return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
 }
 
 function generateUniqueId() {
@@ -117,7 +25,7 @@ function generateUniqueId() {
 }
 
 function setupSheetsIfNeeded() {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
   
   // Check and create Users sheet if needed
   let usersSheet = ss.getSheetByName(USERS_SHEET_NAME);
@@ -187,7 +95,7 @@ function getUsersList() {
 }
 
 // --- Task Management ---
-function getTasks(username) {
+function getTasks() {
   setupSheetsIfNeeded();
   const tasksSheet = getSheet(TASKS_SHEET_NAME);
   if (!tasksSheet) return { success: false, tasks: [], message: 'Tasks sheet not found.' };

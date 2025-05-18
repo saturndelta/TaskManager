@@ -32,31 +32,48 @@ let availableUsers = [];
 
 // --- API Communication ---
 async function apiCall(action, data = {}) {
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: action,
-                ...data
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+    return new Promise((resolve, reject) => {
+        // Create a unique callback name
+        const callbackName = 'jsonpCallback_' + Date.now() + Math.round(Math.random() * 1000000);
+        
+        // Create the URL with parameters
+        const params = new URLSearchParams();
+        params.append('action', action);
+        for (const key in data) {
+            params.append(key, JSON.stringify(data[key]));
         }
-
-        const result = await response.json();
-        if (!result.success) {
-            throw new Error(result.message || 'API call failed');
-        }
-        return result;
-    } catch (error) {
-        console.error('API call error:', error);
-        throw error;
-    }
+        params.append('callback', callbackName);
+        
+        const url = `${API_URL}?${params.toString()}`;
+        
+        // Create script element
+        const script = document.createElement('script');
+        script.src = url;
+        
+        // Define the callback function
+        window[callbackName] = function(response) {
+            // Clean up
+            document.body.removeChild(script);
+            delete window[callbackName];
+            
+            if (response.success) {
+                resolve(response);
+            } else {
+                reject(new Error(response.message || 'API call failed'));
+            }
+        };
+        
+        // Handle errors
+        script.onerror = function() {
+            // Clean up
+            document.body.removeChild(script);
+            delete window[callbackName];
+            reject(new Error('Network error when calling the API'));
+        };
+        
+        // Add script to the document
+        document.body.appendChild(script);
+    });
 }
 
 // --- Authentication ---

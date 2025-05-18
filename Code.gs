@@ -12,10 +12,57 @@ function doOptions(e) {
 
 // Handle GET requests
 function doGet(e) {
-  return ContentService.createTextOutput(
-      JSON.stringify({ success: true, message: "CORS preflight check OK or GET request." })
-    )
-    .setMimeType(ContentService.MimeType.JSON);
+  let responseData;
+  try {
+    const action = e.parameter.action;
+    
+    // Parse JSON parameters
+    const params = {};
+    for (const key in e.parameter) {
+      if (key !== 'action' && key !== 'callback') {
+        try {
+          params[key] = JSON.parse(e.parameter[key]);
+        } catch (error) {
+          params[key] = e.parameter[key];
+        }
+      }
+    }
+    
+    switch (action) {
+      case 'login':
+        responseData = loginUser(params.username, params.password);
+        break;
+      case 'register':
+        responseData = registerUser(params.username, params.password);
+        break;
+      case 'getTasks':
+        responseData = getTasks(params.username);
+        break;
+      case 'addTask':
+        responseData = addTask(params.task, params.username);
+        break;
+      case 'updateTask':
+        responseData = updateTask(params.taskId, params.updates, params.username);
+        break;
+      case 'getUsers':
+        responseData = getUsersList();
+        break;
+      default:
+        responseData = { success: false, message: 'Invalid action' };
+    }
+  } catch (error) {
+    responseData = { success: false, message: 'Error: ' + error.toString() };
+  }
+  
+  // Handle JSONP callback
+  const callback = e.parameter.callback;
+  if (callback) {
+    return ContentService.createTextOutput(callback + '(' + JSON.stringify(responseData) + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  } else {
+    return ContentService.createTextOutput(JSON.stringify(responseData))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 // Handle POST requests

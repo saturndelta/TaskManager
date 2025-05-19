@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friends Task Manager</title>
     <base target="_top">
+    <title>Task Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
       <?!= include('style'); ?>
     </style>
@@ -12,7 +12,25 @@
 <body>
     <div class="container">
         <header>
-            <h1>Friends Task Manager</h1>
+            <h1>Task Manager</h1>
+            <div class="theme-toggle">
+                <button id="themeToggle" aria-label="Toggle dark mode">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
             <div id="userInfo" class="user-info" style="display:none;">
                 Logged in as: <span id="loggedInUser"></span>
                 <button id="logoutButton">Logout</button>
@@ -24,65 +42,102 @@
             <form id="loginForm">
                 <input type="text" id="username" placeholder="Username" required>
                 <input type="password" id="password" placeholder="Password" required>
-                <button type="submit">Login</button>
+                <button type="submit" id="loginButton">Login</button>
             </form>
             <p id="loginError" class="error-message"></p>
-            <p>Don't have an account? <a href="#" id="registerLink">Register here</a></p>
-        </div>
-
-        <div id="registerSection" style="display:none;">
-            <h2>Register</h2>
-            <form id="registerForm">
-                <input type="text" id="registerUsername" placeholder="Username" required>
-                <input type="password" id="registerPassword" placeholder="Password" required>
-                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
-                <button type="submit">Register</button>
-            </form>
-            <p id="registerError" class="error-message"></p>
-            <p>Already have an account? <a href="#" id="loginLink">Login here</a></p>
         </div>
 
         <div id="taskSection" style="display:none;">
-            <h2>Create New Task</h2>
-            <form id="taskForm">
-                <input type="url" id="videoLink" placeholder="Video Link (optional)">
-                <textarea id="taskDescription" placeholder="Task Description" required></textarea>
-                <select id="assignTo">
-                    <option value="">Assign to (optional)</option>
-                    <!-- User options will be populated here -->
-                </select>
-                <button type="submit">Add Task</button>
-            </form>
-            <p id="taskFormError" class="error-message"></p>
+            <div class="task-layout">
+                <div class="task-creation-column">
+                    <div class="task-creation-header">
+                        <h2>Create New Task</h2>
+                        <button id="toggleFormBtn" class="toggle-btn" title="Hide/Show Form">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="15 6 9 12 15 18"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="taskFormContainer" class="task-creation-panel">
+                        <form id="taskForm">
+                            <div class="form-group">
+                                <label for="videoLink">Video Link (optional)</label>
+                                <input type="url" id="videoLink" placeholder="https://...">
+                            </div>
+                            <div class="form-group">
+                                <label for="taskPriority">Priority</label>
+                                <select id="taskPriority">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="High">High</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="taskDescription">Task Description</label>
+                                <textarea id="taskDescription" placeholder="Describe the task..." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" id="addTaskButton">Add Task</button>
+                            </div>
+                        </form>
+                        <p id="taskFormError" class="error-message"></p>
+                    </div>
+                </div>
+                
+                <div class="task-list-column">
+                    <h2>Task Board</h2>
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label for="statusFilter">Filter by status:</label>
+                            <select id="statusFilter">
+                                <option value="all">All</option>
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Solved">Solved</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="assigneeFilter">Filter by assignee:</label>
+                            <select id="assigneeFilter">
+                                <option value="all">All Users</option>
+                                <option value="me">Assigned to Me</option>
+                                <option value="unassigned">Unassigned</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="priorityFilter">Filter by priority:</label>
+                            <select id="priorityFilter">
+                                <option value="all">All Priorities</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="sortBy">Sort by:</label>
+                            <select id="sortBy">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="priority">Priority</option>
+                            </select>
+                        </div>
+                    </div>
 
-            <h2>Task List</h2>
-            <div class="filters">
-                <label for="statusFilter">Filter by status:</label>
-                <select id="statusFilter">
-                    <option value="all">All</option>
-                    <option value="Open">Open</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Solved">Solved</option>
-                </select>
-                <label for="userFilter">Filter by user:</label>
-                <select id="userFilter">
-                    <option value="all">All Users</option>
-                     <!-- User options will be populated here -->
-                </select>
-            </div>
-            <div id="taskList">
-                <!-- Tasks will be dynamically inserted here -->
+                    <div id="taskList" class="task-list-view">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal for Editing Task and Adding Solution -->
+    <!-- Edit Task Modal -->
     <div id="editTaskModal" class="modal">
         <div class="modal-content">
             <span class="close-button">×</span>
-            <h2>Edit Task / Add Solution</h2>
+            <h2 id="editModalTitle">Edit Task / Add Solution</h2>
             <form id="editTaskForm">
                 <input type="hidden" id="editTaskId">
+                <input type="hidden" id="editParentTaskId">
                 <div>
                     <label for="editVideoLink">Video Link:</label>
                     <input type="url" id="editVideoLink">
@@ -95,25 +150,61 @@
                     <label for="editSolution">Solution:</label>
                     <textarea id="editSolution"></textarea>
                 </div>
-                <div>
-                    <label for="editAssignTo">Assigned To:</label>
-                    <select id="editAssignTo">
-                        <option value="">Unassigned</option>
-                         <!-- User options will be populated here -->
-                    </select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editStatus">Status:</label>
+                        <select id="editStatus">
+                            <option value="Open">Open</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Solved">Solved</option>
+                        </select>
+                    </div>
                 </div>
                 <div>
-                    <label for="editStatus">Status:</label>
-                    <select id="editStatus">
-                        <option value="Open">Open</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Solved">Solved</option>
+                    <label for="editPriority">Priority:</label>
+                    <select id="editPriority">
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
                     </select>
                 </div>
-                <button type="submit">Save Changes</button>
+                <button type="submit" id="saveTaskButton">Save Changes</button>
             </form>
             <p id="editTaskError" class="error-message"></p>
         </div>
+    </div>
+
+    <!-- Create Child Task Modal -->
+    <div id="childTaskModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button child-close-button">×</span>
+            <h2>Create Child Task</h2>
+            <p class="parent-task-info">Parent Task: <span id="parentTaskDescription"></span></p>
+            <form id="childTaskForm">
+                <input type="hidden" id="parentTaskId">
+                <div>
+                    <label for="childVideoLink">Video Link (optional):</label>
+                    <input type="url" id="childVideoLink">
+                </div>
+                <div>
+                    <label for="childTaskDescription">Task Description:</label>
+                    <textarea id="childTaskDescription" required></textarea>
+                </div>
+                <div>
+                    <label for="childPriority">Priority:</label>
+                    <select id="childPriority">
+                        <option value="Low">Low</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+                <button type="submit" id="addChildTaskButton">Create Child Task</button>
+            </form>
+            <p id="childTaskError" class="error-message"></p>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer">
     </div>
 
     <script>
